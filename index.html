@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULLSWATER | HR & OPERATIONS MIRROR CONSOLE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-dark: #2c3e50;
+            --accent-red: #c0392b;
+            --border-color: #000;
+            --bg-gray: #e9ecef;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
+            background: var(--bg-gray); 
+            padding: 20px; 
+            color: #1a1a1a; 
+            margin: 0;
+        }
+
+        .nav-header { max-width: 850px; margin: 0 auto 10px auto; display: flex; gap: 5px; }
+        .nav-btn { padding: 12px 20px; border: none; border-radius: 8px 8px 0 0; cursor: pointer; background: #95a5a6; color: white; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .nav-btn.active { background: var(--primary-dark); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .form-container { 
+            max-width: 850px; 
+            background: white; 
+            margin: auto; 
+            padding: 50px; 
+            border: 1px solid #ccc;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 1050px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .header-top { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 4px solid var(--primary-dark); 
+            padding-bottom: 20px; 
+            margin-bottom: 25px; 
+            align-items: flex-start; 
+        }
+
+        .brand-section { flex: 1; }
+        
+        .editable-header { 
+            font-size: 28px; 
+            font-weight: 900; 
+            color: var(--primary-dark); 
+            border: none;
+            width: 100%; 
+            letter-spacing: 1px; 
+            outline: none; 
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .doc-type-container { 
+            background: #fff4f4; 
+            padding: 12px; 
+            border-left: 8px solid var(--accent-red); 
+        }
+
+        .doc-title-input { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: var(--accent-red); 
+            border: none; 
+            background: transparent; 
+            width: 100%; 
+            outline: none; 
+            text-transform: uppercase; 
+        }
+
+        #qrcode-container { 
+            text-align: center; 
+            border: 1px solid var(--border-color); 
+            padding: 8px; 
+            background: #fff; 
+            margin-left: 20px;
+        }
+        .qr-label { font-size: 9px; font-weight: bold; margin-top: 8px; color: var(--accent-red); }
+
+        .memo-meta { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-bottom: 25px; 
+        }
+        .meta-table { width: 100%; border-collapse: collapse; }
+        .meta-table td { padding: 8px; border: 1px solid #ddd; font-size: 13px; }
+        .label { background: #f8f9fa; font-weight: bold; width: 110px; text-transform: uppercase; font-size: 10px; color: #555; }
+
+        input, select { width: 100%; border: none; outline: none; background: transparent; font-family: inherit; font-size: 13px; }
+        
+        #mainContent { 
+            width: 100%;
+            min-height: 400px; 
+            line-height: 1.6; 
+            padding: 15px 0; 
+            border: none;
+            border-top: 1px solid #eee;
+            margin-top: 10px; 
+            font-size: 15px;
+            resize: none;
+            overflow: hidden;
+            display: block;
+        }
+
+        .section-header { 
+            background: var(--primary-dark); 
+            color: white; 
+            padding: 8px 12px; 
+            font-weight: bold; 
+            font-size: 11px; 
+            margin-top: 20px; 
+            text-transform: uppercase; 
+        }
+
+        table.data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        table.data-table th, table.data-table td { border: 1px solid var(--border-color); padding: 10px; text-align: left; font-size: 12px; }
+        th { background: #f2f2f2; text-transform: uppercase; font-size: 10px; }
+
+        .sig-row { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 30px; 
+            margin-top: auto; 
+            padding-top: 60px;
+        }
+        .sig-box { text-align: center; border-top: 1.5px solid var(--border-color); padding-top: 8px; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+
+        #ledgerTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        #ledgerTable th { background: var(--primary-dark); color: white; padding: 12px; font-size: 10px; text-transform: uppercase; }
+        #ledgerTable td { padding: 10px; border: 1px solid #ddd; font-size: 12px; }
+
+        .no-print { max-width: 850px; margin: 20px auto; padding: 20px; background: #ddd; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+        .btn { padding: 10px 8px; border: none; color: white; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 10px; transition: 0.2s; text-transform: uppercase; }
+        .btn-print { background: #2980b9; }
+        .btn-green { background: #27ae60; }
+        .btn-red { background: #c0392b; }
+        .btn-orange { background: #f39c12; }
+        .btn-load { background: #2c3e50; }
+        .btn:hover { opacity: 0.8; }
+
+        @media print {
+            .nav-header, .no-print, .addRowBtn, .action-col { display: none !important; }
+            body { background: white; padding: 0; margin: 0; }
+            .form-container { border: none; box-shadow: none; width: 100%; max-width: 100%; padding: 0; }
+            #mainContent { border: none; height: auto !important; overflow: visible !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav-header">
+    <button class="nav-btn active" id="btnEditor" onclick="showTab(event, 'editor_view')">Console Editor</button>
+    <button class="nav-btn" onclick="showTab(event, 'ledger_view')">Document Ledger</button>
+</div>
+
+<div id="editor_view" class="tab-content active">
+    <div class="form-container">
+        <div class="header-top">
+            <div class="brand-section">
+                <input type="text" id="corpName" value="ULLSWATER CORPORATION" class="editable-header" oninput="saveAndRefresh()">
+                <div class="doc-type-container">
+                    <input list="doc-options" id="docType" class="doc-title-input" placeholder="SELECT DOCUMENT TYPE..." oninput="toggleTable(); saveAndRefresh()">
+                    <datalist id="doc-options">
+                        <option value="NOTICE TO EXPLAIN (NTE)">
+                        <option value="NOTICE OF DISCIPLINARY ACTION">
+                        <option value="NOTICE OF TERMINATION">
+                        <option value="PREVENTIVE SUSPENSION ORDER">
+                        <option value="INTERNAL PERSONNEL MEMORANDUM">
+                        <option value="GENERAL CIRCULAR">
+                        <option value="UNIVERSAL REQUEST (LEAVE/ASSETS)">
+                        <option value="INCIDENT REPORT (OPERATIONS)">
+                    </datalist>
+                </div>
+            </div>
+            <div id="qrcode-container">
+                <div id="qrcode"></div>
+                <div class="qr-label">SECURITY MIRROR DATA</div>
+            </div>
+        </div>
+
+        <div class="memo-meta">
+            <table class="meta-table">
+                <tr><td class="label">Ref No:</td><td><input type="text" id="refNo" oninput="saveAndRefresh()"></td></tr>
+                <tr><td class="label">To:</td><td><input type="text" id="target" oninput="saveAndRefresh()"></td></tr>
+                <tr><td class="label">From:</td><td><input type="text" id="sender" oninput="saveAndRefresh()"></td></tr>
+            </table>
+            <table class="meta-table">
+                <tr><td class="label">Date:</td><td><input type="date" id="docDate" oninput="saveAndRefresh()"></td></tr>
+                <tr><td class="label">Subject:</td><td><input type="text" id="subject" oninput="saveAndRefresh()"></td></tr>
+                <tr><td class="label">Priority:</td><td>
+                    <select id="priority" onchange="saveAndRefresh()">
+                        <option>STANDARD</option>
+                        <option>URGENT</option>
+                        <option>CONFIDENTIAL</option>
+                    </select>
+                </td></tr>
+            </table>
+        </div>
+
+        <div id="itemArea" style="display:none;">
+            <div class="section-header">Reference Items / Assets Involved</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="20%">ID / CODE</th>
+                        <th>DESCRIPTION</th>
+                        <th width="15%">QTY</th>
+                        <th class="no-print" width="30"></th>
+                    </tr>
+                </thead>
+                <tbody id="tableRows"></tbody>
+            </table>
+            <button class="no-print addRowBtn" style="width:100%; padding:8px; margin-top:5px; cursor:pointer;" onclick="addRow()">+ Add New Row</button>
+        </div>
+
+        <div class="section-header">Official Statement / Details</div>
+        <textarea id="mainContent" placeholder="Enter content here..." oninput="autoExpand(this); saveAndRefresh()"></textarea>
+
+        <div class="sig-row">
+            <div class="sig-box">PREPARED BY</div>
+            <div class="sig-box">REVIEWED BY</div>
+            <div class="sig-box">APPROVED BY</div>
+        </div>
+    </div>
+
+    <div class="no-print">
+        <button class="btn btn-print" onclick="window.print()">PRINT AS PDF</button>
+        <button class="btn btn-green" onclick="postToLedger()">POST TO LEDGER</button>
+        <button class="btn btn-orange" onclick="saveJSON()">EXPORT JSON</button>
+        <button class="btn btn-load" onclick="document.getElementById('loadInput').click()">LOAD JSON</button>
+        <button class="btn btn-red" onclick="clearForm()">RESET FORM</button>
+        <input type="file" id="loadInput" style="display:none" accept=".json" onchange="loadJSON(event)">
+    </div>
+</div>
+
+<div id="ledger_view" class="tab-content">
+    <div class="form-container" style="min-height: auto;">
+        <div class="section-header" style="margin-top:0;">MASTER DOCUMENT LEDGER DATABASE</div>
+        <table id="ledgerTable">
+            <thead>
+                <tr>
+                    <th width="15%">DATE</th>
+                    <th width="15%">REF NO</th>
+                    <th width="20%">TYPE</th>
+                    <th width="20%">TARGET</th>
+                    <th width="20%">SUBJECT</th>
+                    <th class="action-col" width="10%">ACTION</th>
+                </tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+        </table>
+    </div>
+    <div class="no-print" style="grid-template-columns: repeat(4, 1fr);">
+        <button class="btn btn-green" onclick="exportLedgerCSV()">EXPORT CSV</button>
+        <button class="btn btn-orange" onclick="exportLedgerBackup()">SAVE DB</button>
+        <button class="btn btn-load" onclick="document.getElementById('dbRestore').click()">LOAD DB</button>
+        <button class="btn btn-red" onclick="wipeLedger()">WIPE DB</button>
+        <input type="file" id="dbRestore" style="display:none" accept=".json" onchange="restoreLedgerDatabase(event)">
+    </div>
+</div>
+
+<script>
+    let ledgerRecords = JSON.parse(localStorage.getItem('ULL_HR_MASTER_DB')) || [];
+
+    function showTab(evt, tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if (evt) evt.currentTarget.classList.add('active');
+        if(tabId === 'ledger_view') renderLedger();
+    }
+
+    function autoExpand(textarea) {
+        textarea.style.height = 'inherit';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function gatherData() {
+        return {
+            corp: document.getElementById('corpName').value,
+            type: document.getElementById('docType').value,
+            ref: document.getElementById('refNo').value,
+            to: document.getElementById('target').value,
+            from: document.getElementById('sender').value,
+            date: document.getElementById('docDate').value,
+            subject: document.getElementById('subject').value,
+            prio: document.getElementById('priority').value,
+            body: document.getElementById('mainContent').value,
+            items: Array.from(document.querySelectorAll('#tableRows tr')).map(r => {
+                const i = r.querySelectorAll('input');
+                return { id: i[0].value, d: i[1].value, q: i[2].value };
+            })
+        };
+    }
+
+    function updateQR() {
+        const d = gatherData();
+        const payload = `ULL-HR|REF:${d.ref}|TYPE:${d.type}|TO:${d.to}|DATE:${d.date}`;
+        const qrDiv = document.getElementById("qrcode");
+        qrDiv.innerHTML = "";
+        new QRCode(qrDiv, { text: payload, width: 140, height: 140, correctLevel : QRCode.CorrectLevel.M });
+    }
+
+    function toggleTable() {
+        const type = document.getElementById('docType').value.toUpperCase();
+        const show = (type.includes("REQUEST") || type.includes("REPORT") || type.includes("ASSET") || type.includes("TERMINATION"));
+        document.getElementById('itemArea').style.display = show ? 'block' : 'none';
+    }
+
+    function addRow(id="", desc="", qty="") {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" value="${id}" oninput="saveAndRefresh()"></td>
+            <td><input type="text" value="${desc}" oninput="saveAndRefresh()"></td>
+            <td><input type="text" value="${qty}" oninput="saveAndRefresh()"></td>
+            <td class="no-print" style="text-align:center;"><button style="color:red; cursor:pointer; border:none; background:none;" onclick="this.parentElement.parentElement.remove(); saveAndRefresh()">✕</button></td>
+        `;
+        document.getElementById('tableRows').appendChild(tr);
+    }
+
+    function saveAndRefresh() {
+        localStorage.setItem('ULL_HR_MIRROR_TEMP', JSON.stringify(gatherData()));
+        updateQR();
+    }
+
+    function postToLedger() {
+        const data = gatherData();
+        if(!data.ref) return alert("Ref No is required to post.");
+        ledgerRecords.push(data);
+        localStorage.setItem('ULL_HR_MASTER_DB', JSON.stringify(ledgerRecords));
+        alert("Transaction Recorded to Master Ledger.");
+    }
+
+    function renderLedger() {
+        const body = document.getElementById('ledgerBody');
+        body.innerHTML = ledgerRecords.map((r, i) => `
+            <tr>
+                <td>${r.date}</td>
+                <td><b>${r.ref}</b></td>
+                <td>${r.type}</td>
+                <td>${r.to}</td>
+                <td>${r.subject}</td>
+                <td class="action-col">
+                    <button class="btn btn-load" style="padding:4px 8px;" onclick="loadRecord(${i})">OPEN</button>
+                    <button class="btn btn-red" style="padding:4px 8px;" onclick="deleteRecord(${i})">DEL</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function loadRecord(i) {
+        const data = ledgerRecords[i];
+        fillForm(data);
+        showTab(null, 'editor_view');
+        document.getElementById('btnEditor').classList.add('active');
+        document.querySelectorAll('.nav-btn')[1].classList.remove('active');
+    }
+
+    function fillForm(d) {
+        document.getElementById('corpName').value = d.corp || "ULLSWATER CORPORATION";
+        document.getElementById('docType').value = d.type || "";
+        document.getElementById('refNo').value = d.ref || "";
+        document.getElementById('target').value = d.to || "";
+        document.getElementById('sender').value = d.from || "";
+        document.getElementById('docDate').value = d.date || "";
+        document.getElementById('subject').value = d.subject || "";
+        document.getElementById('priority').value = d.prio || "STANDARD";
+        
+        // Load the full body text
+        const mainContent = document.getElementById('mainContent');
+        mainContent.value = d.body || "";
+        
+        // Clear and rebuild table rows
+        document.getElementById('tableRows').innerHTML = "";
+        if(d.items && d.items.length > 0) {
+            d.items.forEach(i => addRow(i.id, i.d, i.q));
+        }
+
+        toggleTable();
+        updateQR();
+        
+        // Ensure the textbox expands to show all loaded text immediately
+        setTimeout(() => autoExpand(mainContent), 100);
+        saveAndRefresh();
+    }
+
+    async function restoreLedgerDatabase(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = JSON.parse(await file.text());
+            if(confirm("Merge this backup into current ledger? (Cancel to Replace)")) {
+                ledgerRecords = ledgerRecords.concat(data);
+            } else {
+                ledgerRecords = data;
+            }
+            localStorage.setItem('ULL_HR_MASTER_DB', JSON.stringify(ledgerRecords));
+            renderLedger();
+            alert("Database Restore Successful.");
+        } catch(err) { alert("Invalid Database File."); }
+    }
+
+    function deleteRecord(i) {
+        if(confirm("Delete record?")) {
+            ledgerRecords.splice(i, 1);
+            localStorage.setItem('ULL_HR_MASTER_DB', JSON.stringify(ledgerRecords));
+            renderLedger();
+        }
+    }
+
+    function exportLedgerCSV() {
+        if(!ledgerRecords.length) return alert("Database is empty.");
+        let csv = "\uFEFFDate,Ref No,Type,To,From,Subject,Body\n";
+        ledgerRecords.forEach(r => {
+            csv += `"${r.date}","${r.ref}","${r.type}","${r.to}","${r.from}","${r.subject}","${r.body.replace(/\n/g, ' ')}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `ULL_HR_LEDGER_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+    }
+
+    function exportLedgerBackup() {
+        const blob = new Blob([JSON.stringify(ledgerRecords)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `ULL_HR_MASTER_BACKUP.json`;
+        a.click();
+    }
+
+    function wipeLedger() {
+        if(confirm("Wipe entire database?")) {
+            ledgerRecords = [];
+            localStorage.removeItem('ULL_HR_MASTER_DB');
+            renderLedger();
+        }
+    }
+
+    function saveJSON() {
+        const data = JSON.stringify(gatherData());
+        const blob = new Blob([data], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${document.getElementById('refNo').value || 'DOC'}.json`;
+        a.click();
+    }
+
+    async function loadJSON(e) {
+        const f = e.target.files[0]; if(!f) return;
+        fillForm(JSON.parse(await f.text()));
+    }
+
+    function clearForm() {
+        if(confirm("Clear current form?")) { 
+            localStorage.removeItem('ULL_HR_MIRROR_TEMP'); 
+            location.reload(); 
+        } 
+    }
+
+    window.onload = () => {
+        const s = JSON.parse(localStorage.getItem('ULL_HR_MIRROR_TEMP'));
+        if(s) fillForm(s);
+        else {
+            addRow();
+            document.getElementById('docDate').valueAsDate = new Date();
+            document.getElementById('refNo').value = "ULL-" + Date.now().toString().slice(-6);
+        }
+    };
+</script>
+</body>
+</html>
